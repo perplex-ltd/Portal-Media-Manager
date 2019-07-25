@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Media Manager Control</title>
+        <link rel="stylesheet" type="text/css" href="theme.css">
+        <script src="jquery_3.4.1.min.js"></script>
+        <script src="control.js"></script>
+        <script>
+            $(document).ready( () => {
+                PLX.MediaManager.Control.setup();
+            });
+        </script>
+    </head>
+    <body>
+        <div id="loading" class="loading-small">&nbsp;</div>
+        <div id="error" class="error-control">&nbsp;</div>
+        <div id="main" class="main">
+            <div id="img-container" class="ctrl-element">
+                <img id="img-preview" src="no_picture.png" />
+            </div>
+            <div id="controls" class="ctrl-element">
+                <button class="btn" onclick="PLX.MediaManager.Control.openMediaManager()">Open Media Manager</button>
+            </div>
+        </div>
+    </body>
+</html>

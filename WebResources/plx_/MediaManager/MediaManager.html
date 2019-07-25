@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Media Manager</title>
+        <link rel="stylesheet" href="theme.css" >
+
+        <link rel="icon" href="icon32.png" sizes="32x32" >
+        <link rel="icon" href="icon192.png" sizes="192x192" >
+        
+        <script src="jquery_3.4.1.min.js"></script>
+
+        <script src="jsTree/jstree.min.js"></script>
+        <link rel="stylesheet" href="jsTree/themes/default/style.min.css" >
+
+        <script src="imagePicker/image-picker.min.js"></script>
+        <link rel="stylesheet" href="imagePicker/image-picker.css" >
+
+
+        <script src="browser.js"></script>
+        <script>
+            $(document).ready( () => {
+                PLX.MediaManager.Browser.setup();
+            });
+        </script>
+    </head>
+    <body>
+        <div id="modal"></div>
+        <div id="error" class="error-big">
+            <span class="close cursor" onclick="PLX.MediaManager.Browser.hideError();">&times;</span>
+        </div>
+        <div id="copyright">
+            <span class="close cursor" onclick="PLX.MediaManager.Browser.hideCopyright();">&times;</span>
+            <h3>Media Manager</h3>
+            <p>Copyright &copy; 2019 Perplex Ltd.<br>
+            All rights reserved.</p>
+            <p>Version: 0.1 (24/07/2019)</p>
+            <p>Please visit <a href="https://perplex.world/" target="_blank">perplex.world</a> for contact information.</p>
+        </div>
+        <div id="browser">
+            <div id="header">
+                <div id="logo-container">
+                        <img src="logo.png" alt="Perplex Ltd" class="logo" onclick="PLX.MediaManager.Browser.showCopyright();" />
+                </div>
+                <h1>Media Manager</h1>
+                <h2>Select or upload a picture</h2>
+            </div>
+            <div id="flexbox">
+                <div id="loading" class="loading-tree">&nbsp;</div>
+                <div id="treeview-container">
+                    <div id="treeview"></div>
+                </div>
+                <div id="middle">
+                    <div id="grid-container" class="picture-grid">
+                        <div class="tile">
+                            <div class="content" style="height: 100%;
+                            background: url(https://digitalculturenetwork.microsoftcrmportals.com/knowledge/test.jpg) center center no-repeat;
+                            background-size: cover;">
+                                <label>Test Image.png</label>
+                            </div>
+
+                            <!-- or data:image/png/base64;asdfasdfasfd a-->
+                        </div>
+                    
+                        <div class="tile">
+                            <div class="content spread">
+                            </div>
+                        </div>
+                    
+                        <div class="tile">
+                            <div class="content column">
+                            </div>
+                        </div>
+                    
+                        <div class="tile">
+                            <div class="content spread">
+                            </div>
+                        </div>
+                    
+                        <div class="tile">
+                            <div class="content column">
+                            </div>
+                        </div>
+                                    
+                    </div>
+                </div>
+                <div id="details-container">
+                    details
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
