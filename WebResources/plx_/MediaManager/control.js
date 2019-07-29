@@ -44,6 +44,8 @@ PLX.MediaManager.Control = function () {
                 }
             );    
         }
+
+        window.addEventListener("message", imageSelected, false);     
     
     };
 
@@ -51,6 +53,10 @@ PLX.MediaManager.Control = function () {
         window.open("MediaManager.html", "PerplexMediaManager", 
             "menubar=no,location=no,resizable=yes,scrollbars=yes,status=no");
     };
+
+    function imageSelected(e) {
+        alert("Image selected");
+    }
 
     function showError(message) {
         $("#error").text(message);

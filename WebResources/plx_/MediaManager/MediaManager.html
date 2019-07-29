@@ -4,22 +4,19 @@
         <title>Media Manager</title>
         <link rel="stylesheet" href="theme.css" >
 
-        <link rel="icon" href="icon32.png" sizes="32x32" >
-        <link rel="icon" href="icon192.png" sizes="192x192" >
+        <link rel="icon" href="icon32.png" sizes="32x32" />
+        <link rel="icon" href="icon192.png" sizes="192x192" />
         
         <script src="jquery_3.4.1.min.js"></script>
 
         <script src="jsTree/jstree.min.js"></script>
-        <link rel="stylesheet" href="jsTree/themes/default/style.min.css" >
+        <link rel="stylesheet" href="jsTree/themes/default/style.min.css" />
 
-        <script src="imagePicker/image-picker.min.js"></script>
-        <link rel="stylesheet" href="imagePicker/image-picker.css" >
-
-
-        <script src="browser.js"></script>
+        <script src="MediaManager.Browser.js"></script>
+        <script src="MediaManager.MockIntf.js"></script>
         <script>
             $(document).ready( () => {
-                PLX.MediaManager.Browser.setup();
+                PLX.MediaManager.initBrowser(new PLX.MediaManager.MockIntf());
             });
         </script>
     </head>
@@ -42,7 +39,13 @@
                         <img src="logo.png" alt="Perplex Ltd" class="logo" onclick="PLX.MediaManager.Browser.showCopyright();" />
                 </div>
                 <h1>Media Manager</h1>
-                <h2>Select or upload a picture</h2>
+            </div>
+            <div id="uploadContainer">
+                <div id="uploader">
+                    <div class="dz-message needsclick">
+                        Drop files here or click to upload.
+                    </div>
+                </div>
             </div>
             <div id="flexbox">
                 <div id="loading" class="loading-tree">&nbsp;</div>
@@ -51,40 +54,92 @@
                 </div>
                 <div id="middle">
                     <div id="grid-container" class="picture-grid">
-                        <div class="tile">
-                            <div class="content" style="height: 100%;
+                        <div class="tile" id="upload">
+                            <div class="content" id="uploadNewImage" onclick>
+                                <label id="fileUploadLabel" for="imageUploadFile" class="thumbnail">
+                                    <span>Drop image here or click to upload.</span>
+                                    <input type="file" id="imageUploadFile" accept="image/*" onchange="PLX.MediaManager.Browser.fileInputChanged(this)" >
+                                </label>
+                            </div>
+                        </div>
+                        <div class="tile selectable">
+                            <div class="content" style="
                             background: url(https://digitalculturenetwork.microsoftcrmportals.com/knowledge/test.jpg) center center no-repeat;
                             background-size: cover;">
-                                <label>Test Image.png</label>
+                                <label class="thumbnail">Test Image.png</label>
+                            </div>
+                        </div>
+                        <div class="tile selectable selected">
+                            <div class="content" style="
+                            background: url(https://digitalculturenetwork.microsoftcrmportals.com/knowledge/test.jpg) center center no-repeat;
+                            background-size: cover;">
+                                <label class="thumbnail">Test Image with a really long and rather borish name.png</label>
+                            </div>
+                            <!-- or data:image/png/base64;asdfasdfasfd a-->
+                        </div>
+                        <div class="tile selectable">
+                            <div class="content" style="
+                            background: url(https://digitalculturenetwork.microsoftcrmportals.com/knowledge/test.jpg) center center no-repeat;
+                            background-size: cover;">
+                                <label class="thumbnail">Now this picture (or file name, as some prefer to say), is even longer than the one before. You could almost say, it's a bit of a novel. But then, not really, just almost, though it is rather long for a filename. Not even really sure if any file system support such long names, but then again, this text is really only that long to see how it'll look.png</label>
+                            </div>
+                        </div>
+                        <div class="tile selectable">
+                            <div class="content" style="
+                            background: url('data:image/png;base64, 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')
+                             center center no-repeat;
+                            background-size: cover;">
+                                <label class="thumbnail">Test Image.png</label>
                             </div>
 
                             <!-- or data:image/png/base64;asdfasdfasfd a-->
                         </div>
-                    
-                        <div class="tile">
+                        <div class="tile selectable">
                             <div class="content spread">
                             </div>
                         </div>
-                    
-                        <div class="tile">
+                        <div class="tile selectable">
+                                <div class="content spread">
+                                </div>
+                            </div>
+                                
+                        <div class="tile selectable">
                             <div class="content column">
                             </div>
                         </div>
                     
-                        <div class="tile">
+                        <div class="tile selectable">
                             <div class="content spread">
                             </div>
                         </div>
                     
-                        <div class="tile">
+                        <div class="tile selectable">
                             <div class="content column">
                             </div>
                         </div>
-                                    
                     </div>
                 </div>
                 <div id="details-container">
-                    details
+                    <h4>Image details</h4>
+                    <img id="previewImage" src="https://digitalculturenetwork.microsoftcrmportals.com/knowledge/test.jpg" />
+                    <label class="labelInput">
+                        <span>Name</span>
+                        <input type="text" id="picName" disabled value="testimage.png" class="picInfo" />
+                    </label>    
+                    <!--label class="labelInput">
+                        <span>Url</span>
+                        <input type="text" id="picUrl" disabled value="/knowledge/testimage.png" class="picInfo" />
+                    </label-->    
+                    <label class="labelInput">
+                        <span>Width</span>
+                        <input type="text" id="picWidth" disabled value="800px" class="picInfo" />
+                    </label>    
+                    <label class="labelInput">
+                        <span>Height</span>
+                        <input type="text" id="picHeight" disabled value="1200px" class="picInfo" />
+                    </label>
+                    <div>&nbsp;</div>
+                    <button id="select">Select Image</button>
                 </div>
             </div>
         </div>

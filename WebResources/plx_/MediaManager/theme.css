@@ -3,7 +3,8 @@ body {
     font-family: "SegoeUI","Segoe UI",sans-serif;
     font-size: 14px;
     color: rgb(68, 68, 68);
-    background-color: #a0a0a0;
+    background-color: #f6f9fd;
+    background-image: linear-gradient(160deg, #e3ebf3, #cfe6f5);
 }
 
 a,
@@ -93,10 +94,13 @@ a:active {
 }
 
 #header {
+    box-sizing: border-box;
     background-color: #1D70B8;
     color: #fff;
-    height: 110px;
-    padding: 8px 8px;
+    height: 42px;
+    padding: 0px 14px;
+    border-radius: 8px;
+    margin: 10px;
 }
 #logo-container {
     float: right
@@ -112,7 +116,16 @@ h2 {
 h3 {
     font-size: 16px;
     font-weight: bold;
+    color: #3c505e;
+    margin-top: 8px;
 }
+h4 {
+    margin-top: 0px;
+    color: #3c505e;
+    font-weight: 700;
+    font-size: 11pt;
+}
+
 /* The Modal (background) */
 #modal {
     display: none;
@@ -124,7 +137,7 @@ h3 {
     height: 100%;
     overflow: auto;
     background-color: black;
-    opacity: 0.8;
+    opacity: 0.5;
     z-index: 1;
 }
 
@@ -150,6 +163,10 @@ h3 {
     font-size: 35px;
     font-weight: bold;
 }
+.logo {
+    padding-top: 7px;
+    padding-right: 0px;
+}
 .logo:hover {
     cursor: pointer;
 }
@@ -163,33 +180,42 @@ h3 {
 #flexbox {
     display: flex;
     flex-wrap: nowrap;
-    height: calc(100vh - 126px);
-    background-color: #f0f0f0;
+    height: calc(100vh - 72px);
+    background-color: #f2f6f9;
     overflow: auto;
+    margin: 10px;
+    border-radius: 8px;
+    min-width: 220px
+}
+
+#middle {
+    width: 60%;
+    background-color: #fefeff;
+    height: auto;
+    display: block;
+}
+
+#details-container {
+    width: 20%;
+    background-color: #f2f6f9;
+    padding: 8px 8px;
+    height: auto;
+    min-width: 150px;
 }
 
 #treeview-container {
     width: 20%;
-    background-color: #f0f0f0;
+    background-color: #f2f6f9;
     padding: 8px 8px;
+    min-width: 150px;
 }
-#middle {
-    width: 60%;
-    background-color: #fff;
 
-    display: block;
-}
 #grid-container {
     display: flex;
     flex-wrap: wrap;
     flex-direction: row;
+    height: auto;
 }
-#details-container {
-    width: 20%;
-    background-color: #f0f0f0;
-    padding: 8px 8px;
-}
-
 .picture-grid {
     display: flex;
     flex-wrap: wrap;
@@ -197,21 +223,61 @@ h3 {
   
 .tile {
     position: relative;
-    flex-basis: calc(20% - 10px);
+    /*flex-basis: calc(20% - 10px);*/
     margin: 5px;
     border: 0;
     box-sizing: border-box;
     background-color: #d0d0d0;
     box-shadow: inset 0 0 15px rgba(0,0,0,.1), inset 0 0 0 1px rgba(0,0,0,.05);
-    border-radius: 2px;
+    border-radius: 4px;
 }
 
-  
+@media (min-width: 1620px) {
+    .tile {
+        flex-basis: calc((100%/8) - 10px);
+    }
+}
+@media (min-width: 1420px) and (max-width: 1619px) {
+    .tile {
+        flex-basis: calc((100%/7) - 10px); 
+    }
+}
+@media (min-width: 1220px) and (max-width: 1419px) {
+    .tile {
+        flex-basis: calc((100%/6) - 10px);
+    }
+}
+@media (min-width: 1020px) and (max-width: 1219px) {
+    .tile {
+        flex-basis: calc((100%/5) - 10px);
+    }
+}
+@media (min-width: 820px) and (max-width: 1019px) {
+    .tile {
+        flex-basis: calc((100%/4) - 10px);
+    }
+}
+@media (min-width: 680px) and (max-width: 819px) {
+    .tile {
+        flex-basis: calc((100%/3) - 10px);
+    }
+}
+@media (min-width: 560px) and (max-width: 679px) {
+    .tile {
+        flex-basis: calc((100%/2) - 10px);
+    }
+}
+@media (max-width: 560px) {
+    .tile {
+        flex-basis: calc(100% - 10px);
+    }
+}
 .tile::before {
     content: '';
     display: block;
     padding-top: 100%;
 }
+
   
 .tile .content {
     position: absolute;
@@ -219,15 +285,122 @@ h3 {
     height: 100%;
     width: 100%;
     cursor: pointer;
+    border-radius: 4px;
 }
-.content > label  {
-    display: block;
+.content label.thumbnail  {
+    display: none;
     background-color: white;
     opacity: 0.7;
     text-align: center;
     position: absolute;
-    width: 100%;
+    width: calc(100% - 2px);
     bottom: 0;
-    height: 26px;
-    padding-top: 4px;
+    min-height: 19px;
+    max-height: calc(100% - 4px);
+    overflow: hidden;
+    padding: 2px 0px 2px 2px;
+    font-size: 8pt;
+    width: calc(100% - 2px);
+}
+.content:hover > label  {
+    display: block;    
+    
+}
+#uploadNewImage {
+    background: url('upload.png') center center no-repeat;
+    background-size: cover;
+}
+.selectable:hover,
+.selected {
+    border: 4px #1D70B8 solid;
+    border-radius: 4px;
+}
+#uploadContainer {
+    display: none;
+    position: fixed;
+    top: 67px;
+    left: 282px;
+    background-color: #fff;
+    border: 2px dashed rgb(68, 139, 201);
+    margin: auto;
+    width: 0px;
+    height: 0px;
+    border-radius: 10px;
+    padding: 19px;
+    z-index: 1;
+}
+#uploader {
+    display: none;
+    margin: 0px;
+    height: 100%;
+    text-align: center;
+}
+
+#previewImage {
+    width: 100%;
+    margin-bottom: 12px;
+}
+label.labelInput {
+    margin-top: 6px;
+    margin-right: 6px;
+    width: 100%;
+    display: block;
+    text-align: right;
+}
+label.labelInput span {
+    display: inline-block;
+    margin-right: 8px;
+}
+label.labelInput input {
+    width: calc(100% - 75px);
+    font-family: inherit;
+    font-size: inherit; 
+    cursor: inherit;
+}
+input {
+    border: 1px solid #ccd7e4;
+    background-color: inherit;
+    color: #828a95;
+    padding: 2px 4px;
+}
+button {
+    background-color: #1D70B8;
+    border: 1px solid rgb(7, 52, 92);
+    border-radius: 5px;
+    width: 100%;
+    margin-top: 18px;
+    height: 34px;
+    color: #fff;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit; 
+}
+button:hover {
+    background-color: rgb(68, 139, 201);
+}
+button:disabled {
+    background-color: rgb(68, 139, 201);
+    border-color: rgb(68, 139, 201);
+}
+.fileupload {
+    box-sizing: border-box;
+    width: 100%;
+    margin-top: 5px;
+}
+.activeDropTarget {
+    background: url(UploadActive.png) center center no-repeat !important;
+    background-size: cover !important;
+}
+#imageUploadFile {
+    display: none;
+}
+#fileUploadLabel {
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+#fileUploadLabel span {
+    left: 0px;
+    bottom: 0px;
+    position: absolute;
 }
