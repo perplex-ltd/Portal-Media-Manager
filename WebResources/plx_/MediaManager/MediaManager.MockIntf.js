@@ -327,7 +327,7 @@ PLX.MediaManager.MockIntf = class MockIntf {
                     ]
                     */
                 );
-            }, 2000);
+            }, 400);
         });
     };
 
@@ -370,7 +370,7 @@ PLX.MediaManager.MockIntf = class MockIntf {
                     ]);
                 }
 
-            }, 1000);
+            }, 300);
         });
     };
 
@@ -388,7 +388,7 @@ PLX.MediaManager.MockIntf = class MockIntf {
         return new Promise((resolve) => {
             setTimeout(() => {
                 resolve();
-            }, 2000);
+            }, 200);
         });
     };
 

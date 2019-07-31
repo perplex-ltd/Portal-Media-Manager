@@ -2,13 +2,13 @@ var PLX = PLX || {};
 PLX.MediaManager = PLX.MediaManager || {};
 
 PLX.MediaManager.Control = function () {
-    
+
     var Xrm = null;
     var formContext = null;
     var lookupAttribute = null;
     var crmIntf;
 
-    var setup = function(intf) {
+    var setup = async function (intf) {
         crmIntf = intf;
         var lookupName = getParameterByName("data");
 
@@ -17,40 +17,51 @@ PLX.MediaManager.Control = function () {
         lookupAttribute = formContext.getAttribute(lookupName);
         if (!lookupAttribute) {
             showError("MediaManager: Didn't find attribute \"" + lookupName + "\".\n" +
-                "Please make sure to put the correct  Web File lookup attribute name in the custom parameter (data) section " +  
+                "Please make sure to put the correct  Web File lookup attribute name in the custom parameter (data) section " +
                 "of the web resource and to add the lookup field on the form.");
-                return;
+            return;
         }
+        reloadImage();
+        window.addEventListener("message", imageSelected, false);
 
+    };
+
+    var reloadImage = async function (id) {
         var lookupValue = lookupAttribute.getValue();
         if (!lookupValue) {
             $("#loading").hide();
             $("#main").show();
         } else {
             var id = lookupAttribute.getValue()[0].id;
-            crmIntf.getImageSrc(id).then((src) => {
+            let file = await crmIntf.getWebFile(id);
+            crmIntf.getImageSrc(file).then((src) => {
                 $("#img-preview").attr("src", src);
-                        $("#loading").hide();
-                        $("#main").show();
+                $("#loading").hide();
+                $("#main").show();
             }).catch((error) => {
                 showError(error);
             });
         }
-
-        window.addEventListener("message", imageSelected, false);     
-    
-    };
+    }
 
     var openMediaManager = () => {
-        window.open("MediaManager.html", "PerplexMediaManager", 
+        window.open("MediaManager.html", "PerplexMediaManager",
             "menubar=no,location=no,resizable=yes,scrollbars=yes,status=no");
     };
 
     function imageSelected(e) {
-        if (e.origin == window.localation.origin) {
+        if (e.origin == window.location.origin) {
             if (e.data && e.data.message == "imageSelected") {
-                let id = e.data.id;
-                debugger;
+                $("#loading").show();
+                let file = e.data.file;
+                lookupAttribute.setValue([
+                    {
+                        id: file.id,
+                        name: file.name,
+                        entityType: "adx_webfile"
+                    }
+                ]);
+                reloadImage();
             }
         }
     }

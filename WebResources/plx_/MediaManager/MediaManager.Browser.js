@@ -22,22 +22,16 @@ class Browser {
             this.setupUploader();
             $("#select").on("click", this.selectPicture);
             await this.loadTreeview();
-            this.currentFolderId = this.getParameterByName("folder");
-            if (this.currentFolderId) {
-                $('#treeview-container').jstree(true).select_node('2345');
-            } else {
-                this.hideLoading();
-            }
+            $('#treeview-container').jstree(true).select_node(this.currentFolderId);
         } catch (error) {
             this.hideLoading();
             this.showError(error);
         }
     };
 
-
     setupUploader() {
         console.log("setup uploader...");
-        let dropArea = document.getElementById('uploadNewImage');
+        let dropArea =  document.getElementById('middle');
         // prevent default event
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             dropArea.addEventListener(eventName, (e) => {
@@ -60,23 +54,101 @@ class Browser {
             let files = dt.files;
             if (files.length == 1) {
                 let file = dt.files[0];
-                this.uploadImage(file);
+                this.showUploader(file);
             }
         }, false);
     }
 
-    async uploadImage(file) {
-        this.showLoading();
-        await this.intf.uploadFile(file, this.currentFolderId);
-        await this.loadFolder(this.currentFolderId);
-        this.hideLoading();
+    imageToUpload = null;
+
+    async uploadImage() {
+        if (this.imageToUpload) {
+            this.showLoading();
+            try{
+                await this.intf.uploadFile(this.imageToUpload, this.currentFolderId, {
+                    fileName: $("#upFileName").val(),
+                    title: $("#upTitle").val(),
+                    partialUrl: $("#upPartialUrl").val()
+                });
+                await this.loadFolder(this.currentFolderId);
+                this.closeUploader();
+                this.hideLoading();
+            } catch (error) {
+                this.closeUploader(true);
+                this.hideLoading();
+                this.showError(error);
+            }
+        }
     }
 
     async fileInputChanged(input) {
         if (input.files.length == 1) {
-            this.uploadImage(input.files[0]);
+            this.showUploader(input.files[0])
         }
     }
+
+    showUploader(file) {
+        this.imageToUpload = file;
+        $("#upFileName").val(file.name);
+        $("#upPartialUrl").val(this.convertToUrl(file.name));
+        $("#upTitle").val(this.convertToTitle(file.name));
+        $("#upSize").val(this.sizeToString(file.size));
+        $("#upType").val(file.type);
+        $("#modal").show();
+        $("#uploadContainer").show();
+        $("#uploadContainer").animate({
+            opacity: 1,
+            width: 400,
+            height: 250
+        }, 200);
+        setTimeout(() => {
+            $("#uploader").fadeIn(200);
+        }, 100);
+    };
+
+    convertToUrl(fileName) {
+        return fileName.replace(" ", "-").toLowerCase();
+    }
+    convertToTitle(fileName) {
+        var title = fileName.replace(/\.[^.]+$/, ""); // remove file ending
+        title = title.replace(/([a-z])([A-Z])/g, "$1 $2"); // camelCase => camel Case
+        title = title.replace(/\W/g, " "); // replace any special characters with space
+        title = title.replace(/(\b[a-z])/g, (m) => { return m.toUpperCase()}); // capitalise each word
+        return title;
+    }
+    // Thanks https://www.codexworld.com/how-to/convert-file-size-bytes-kb-mb-gb-javascript/
+    sizeToString(bytes, decimalPoint) {
+        if(bytes == 0) return '0 Bytes';
+        var k = 1024,
+            dm = decimalPoint || 2,
+            sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
+            i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
+
+    closeUploader(noAnimate) {
+        this.imageToUpload = null;
+        document.getElementById("uploadForm").reset();
+        if (noAnimate) {
+            $("#uploader").hide();
+            $("#uploadContainer")
+                .css("opacity", 0) 
+                .css("width", 0) 
+                .css("height", 0);
+            $("#modal").hide();
+            $("#uploadContainer").hide();
+        } else {
+            $("#uploader").fadeOut(200);
+            $("#uploadContainer").animate({
+                opacity: 0,
+                width: 0,
+                height: 0
+            }, 400, () => {
+                $("#modal").hide();
+                $("#uploadContainer").hide();
+            });
+        }
+    };
 
     async loadTreeview() {
         this.clearGrid();
@@ -93,7 +165,7 @@ class Browser {
 
     clearDetailsPane() {
         $(".picInfo").val("");
-        $("#previewImage").attr("src", "no_picture.png");
+        $("#previewImage").attr("src", "details.png");
         $("#select").attr("disabled", true);
         this.currentImage = null;
 
@@ -102,8 +174,8 @@ class Browser {
     async loadFolder(pageId) {
         this.showLoading();
         var webFiles = await this.intf.getFiles(pageId);
-        this.currentFolderId = pageId;
         this.clearGrid();
+        this.currentFolderId = pageId;
         webFiles.forEach((f) => {
             PLX.MediaManager.Browser.createFileCard(f);
         });
@@ -113,12 +185,12 @@ class Browser {
     async createFileCard(file) {
         console.log("addding file " + file.id);
         let card = $.parseHTML('<div class="tile selectable" onclick="PLX.MediaManager.Browser.select(this)" ' +
-            'data-fileId="' + file.id + '" data-filename="' + file.name + '">' +
+            'data-fileId="' + file.id + '" data-filename="' + file.name + '" data-file=\'' + JSON.stringify(file) + '\'>' +
             '<div class="content" >' +
             '  <label class="thumbnail">' + file.name + '</label>' +
             '</div>');
         $("#grid-container").append(card);
-        let imgSrc = await this.intf.getImageSrc(file.id);
+        let imgSrc = await this.intf.getImageSrc(file);
         console.log("url('" + imgSrc + "')");
         $(card).children(".content")
             .css("background", "url('" + imgSrc + "')")
@@ -142,20 +214,29 @@ class Browser {
             };
         }
         $("#picName").val($(tile).data("filename"));
-        this.currentImage = $(tile).data("fileid");
+        let file = $(tile).data("file");
+        $("#picTitle").val(file.title);
+        $("#picType").val(file.title);
+        $("#picPartialUrl").val(file.partialUrl);
+        this.currentImage = file;
         $("#select").removeAttr("disabled");
     }
 
     selectPicture(e) {
         window.opener.postMessage({
             message: "imageSelected",
-            id: this.currentImage
+            file: PLX.MediaManager.Browser.currentImage
         }, window.location.origin);
         window.close();
     }
 
     async setupTree(items) {
         return new Promise((resolve) => {
+
+            this.currentFolderId = this.getParameterByName("folder");
+            if (!this.currentFolderId) {
+                this.currentFolderId = items.find((value) => { return value.parent == "#";}).id;
+            }
             $('#treeview-container').jstree({
                 'core': {
                     'data': items
@@ -176,31 +257,6 @@ class Browser {
         });
     }
 
-    showUploader() {
-        $("#modal").show();
-        $("#uploadContainer").show();
-        $("#uploadContainer").animate({
-            opacity: 1,
-            width: 280,
-            height: 150
-        }, 200);
-        setTimeout(() => {
-            $("#uploader").fadeIn(200);
-        }, 100)
-    };
-
-    hideUploader() {
-        $("#uploader").fadeOut(200);
-        $("#uploadContainer").animate({
-            opacity: 0,
-            width: 0,
-            height: 0
-        }, 400, () => {
-            $("#modal").hide();
-            $("#uploadContainer").hide();
-        });
-    };
-
     showCopyright() {
         $("#modal").show();
         $("#copyright").show();
@@ -212,6 +268,7 @@ class Browser {
     };
 
     hideError() {
+        $("#modal").hide();
         $("#error").hide();
     }
 

@@ -325,7 +325,7 @@ h4 {
     top: 67px;
     left: 282px;
     background-color: #fff;
-    border: 2px dashed rgb(68, 139, 201);
+    border: none;
     margin: auto;
     width: 0px;
     height: 0px;
@@ -337,7 +337,6 @@ h4 {
     display: none;
     margin: 0px;
     height: 100%;
-    text-align: center;
 }
 
 #previewImage {
@@ -356,7 +355,7 @@ label.labelInput span {
     margin-right: 8px;
 }
 label.labelInput input {
-    width: calc(100% - 75px);
+    width: calc(100% - 85px);
     font-family: inherit;
     font-size: inherit; 
     cursor: inherit;
@@ -364,8 +363,10 @@ label.labelInput input {
 input {
     border: 1px solid #ccd7e4;
     background-color: inherit;
-    color: #828a95;
     padding: 2px 4px;
+}
+input:disabled {
+    color: #828a95;
 }
 button {
     background-color: #1D70B8;
