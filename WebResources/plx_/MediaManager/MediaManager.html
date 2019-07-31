@@ -14,16 +14,20 @@
 
         <script src="MediaManager.Browser.js"></script>
         <script src="MediaManager.MockIntf.js"></script>
+        <script src="MediaManager.CRM.js"></script>
         <script>
             $(document).ready( () => {
-                PLX.MediaManager.initBrowser(new PLX.MediaManager.MockIntf());
+                //PLX.MediaManager.initBrowser(new PLX.MediaManager.MockIntf());
+                PLX.MediaManager.initBrowser(new PLX.MediaManager.CRM(window.opener.parent.Xrm));
             });
         </script>
     </head>
-    <body>
+    <body class="browser">
         <div id="modal"></div>
         <div id="error" class="error-big">
             <span class="close cursor" onclick="PLX.MediaManager.Browser.hideError();">&times;</span>
+            <h3>Oopsy daisy!</h3>
+            <p id="error-message"></p>
         </div>
         <div id="copyright">
             <span class="close cursor" onclick="PLX.MediaManager.Browser.hideCopyright();">&times;</span>
@@ -39,13 +43,6 @@
                         <img src="logo.png" alt="Perplex Ltd" class="logo" onclick="PLX.MediaManager.Browser.showCopyright();" />
                 </div>
                 <h1>Media Manager</h1>
-            </div>
-            <div id="uploadContainer">
-                <div id="uploader">
-                    <div class="dz-message needsclick">
-                        Drop files here or click to upload.
-                    </div>
-                </div>
             </div>
             <div id="flexbox">
                 <div id="loading" class="loading-tree">&nbsp;</div>

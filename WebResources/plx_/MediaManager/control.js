@@ -6,9 +6,10 @@ PLX.MediaManager.Control = function () {
     var Xrm = null;
     var formContext = null;
     var lookupAttribute = null;
+    var crmIntf;
 
-    var setup = function() {
-
+    var setup = function(intf) {
+        crmIntf = intf;
         var lookupName = getParameterByName("data");
 
         Xrm = parent.Xrm;
@@ -27,22 +28,13 @@ PLX.MediaManager.Control = function () {
             $("#main").show();
         } else {
             var id = lookupAttribute.getValue()[0].id;
-            id = id.replace("{", "").replace("}", "");
-            Xrm.WebApi.online.retrieveMultipleRecords("annotation", "?$select=documentbody,filename&$filter=_objectid_value eq " + id).then(
-                function success(results) {
-                    // todo: multiple attachements?
-                    for (var i = 0; i < results.entities.length; i++) {
-                        var documentbody = results.entities[i]["documentbody"];
-                        var filename = results.entities[i]["filename"];
-                        $("#img-preview").attr("src", "data:image/png;base64, " + documentbody);
+            crmIntf.getImageSrc(id).then((src) => {
+                $("#img-preview").attr("src", src);
                         $("#loading").hide();
                         $("#main").show();
-                    }
-                },
-                function(error) {
-                    showError(error.message);
-                }
-            );    
+            }).catch((error) => {
+                showError(error);
+            });
         }
 
         window.addEventListener("message", imageSelected, false);     
@@ -55,7 +47,12 @@ PLX.MediaManager.Control = function () {
     };
 
     function imageSelected(e) {
-        alert("Image selected");
+        if (e.origin == window.localation.origin) {
+            if (e.data && e.data.message == "imageSelected") {
+                let id = e.data.id;
+                debugger;
+            }
+        }
     }
 
     function showError(message) {

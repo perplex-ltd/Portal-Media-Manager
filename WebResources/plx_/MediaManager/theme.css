@@ -3,6 +3,8 @@ body {
     font-family: "SegoeUI","Segoe UI",sans-serif;
     font-size: 14px;
     color: rgb(68, 68, 68);
+}
+body.browser {
     background-color: #f6f9fd;
     background-image: linear-gradient(160deg, #e3ebf3, #cfe6f5);
 }
@@ -44,6 +46,7 @@ a:active {
     background-color: #fff;
     border-radius: 10px;
     padding: 19px;
+    z-index: 1;
 }
 
 .main {
@@ -86,11 +89,11 @@ a:active {
     height: 40px;
     outline: none;
     cursor: pointer;
-    background-color: #D8D8D8;
     font-size: 14px;
     border-radius: 2px;
     font-family: "SegoeUI","Segoe UI",sans-serif;
     border: none;
+    margin-top: 10px;
 }
 
 #header {
@@ -208,6 +211,7 @@ h4 {
     background-color: #f2f6f9;
     padding: 8px 8px;
     min-width: 150px;
+    overflow: scroll;
 }
 
 #grid-container {

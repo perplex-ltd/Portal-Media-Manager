@@ -5,9 +5,10 @@
         <link rel="stylesheet" type="text/css" href="theme.css">
         <script src="jquery_3.4.1.min.js"></script>
         <script src="control.js"></script>
+        <script src="MediaManager.CRM.js"></script>
         <script>
             $(document).ready( () => {
-                PLX.MediaManager.Control.setup();
+                PLX.MediaManager.Control.setup(new PLX.MediaManager.CRM(parent.Xrm));
             });
         </script>
     </head>

@@ -1,12 +1,12 @@
 var PLX = PLX || {};
 PLX.MediaManager = PLX.MediaManager || {};
 
-PLX.MediaManager.initBrowser = async function(intf) {
+PLX.MediaManager.initBrowser = async function (intf) {
     PLX.MediaManager.Browser = new Browser(intf);
     await PLX.MediaManager.Browser.init();
 };
 
-class Browser  {
+class Browser {
 
     intf;
     currentFolderId;
@@ -16,19 +16,24 @@ class Browser  {
         this.intf = intf;
     }
     async init() {
-        this.showLoading();
-        this.clearGrid();
-        this.setupUploader();  
-        $("#select").on("click", this.selectPicture);
-        await this.loadTreeview();
-        this.currentFolderId = this.getParameterByName("folder");
-        if (this.currentFolderId) {
-            $('#treeview-container').jstree(true).select_node('2345');
-        } else {
+        try {
+            this.showLoading();
+            this.clearGrid();
+            this.setupUploader();
+            $("#select").on("click", this.selectPicture);
+            await this.loadTreeview();
+            this.currentFolderId = this.getParameterByName("folder");
+            if (this.currentFolderId) {
+                $('#treeview-container').jstree(true).select_node('2345');
+            } else {
+                this.hideLoading();
+            }
+        } catch (error) {
             this.hideLoading();
+            this.showError(error);
         }
     };
-    
+
 
     setupUploader() {
         console.log("setup uploader...");
@@ -36,24 +41,24 @@ class Browser  {
         // prevent default event
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             dropArea.addEventListener(eventName, (e) => {
-                e.preventDefault(); 
-                e.stopPropagation(); 
+                e.preventDefault();
+                e.stopPropagation();
             }, false);
         });
         ['dragenter', 'dragover'].forEach(eventName => {
             dropArea.addEventListener(eventName, (e) => {
-                    $('#uploadNewImage').addClass('activeDropTarget');
-                }, false)
-          });
-          
+                $('#uploadNewImage').addClass('activeDropTarget');
+            }, false)
+        });
+
         ['dragleave', 'drop'].forEach(eventName => {
             dropArea.addEventListener(eventName, (e) => { $('#uploadNewImage').removeClass('activeDropTarget') }, false)
         });
-        
+
         dropArea.addEventListener('drop', (e) => {
             let dt = e.dataTransfer;
             let files = dt.files;
-            if (files.length==1) {
+            if (files.length == 1) {
                 let file = dt.files[0];
                 this.uploadImage(file);
             }
@@ -108,8 +113,8 @@ class Browser  {
     async createFileCard(file) {
         console.log("addding file " + file.id);
         let card = $.parseHTML('<div class="tile selectable" onclick="PLX.MediaManager.Browser.select(this)" ' +
-        'data-fileId="' +file.id + '" data-filename="' +file.name + '">' +
-            '<div class="content" >' + 
+            'data-fileId="' + file.id + '" data-filename="' + file.name + '">' +
+            '<div class="content" >' +
             '  <label class="thumbnail">' + file.name + '</label>' +
             '</div>');
         $("#grid-container").append(card);
@@ -126,7 +131,7 @@ class Browser  {
         let bg = $(tile).children(".content").css("background");
         //rgba(0, 0, 0, 0) url("https://digitalculturenetwork.microsoftcrmportals.com/knowledge/test.jpg") repeat scroll 0% 0% / cover padding-box border-box
         let matches = bg.match(/url\("(.*)"\)/)
-        if (matches.length==2) {
+        if (matches.length == 2) {
             let src = matches[1];
             $("#previewImage").attr("src", src);
             let img = document.createElement("img");
@@ -140,9 +145,9 @@ class Browser  {
         this.currentImage = $(tile).data("fileid");
         $("#select").removeAttr("disabled");
     }
-    
+
     selectPicture(e) {
-        window.opener.postMesssage({
+        window.opener.postMessage({
             message: "imageSelected",
             id: this.currentImage
         }, window.location.origin);
@@ -152,36 +157,36 @@ class Browser  {
     async setupTree(items) {
         return new Promise((resolve) => {
             $('#treeview-container').jstree({
-                'core' : {
-                    'data' : items
+                'core': {
+                    'data': items
                 }
             })
-            .on('ready.jstree', function (e, data) {
-                resolve({e: e, data: data});
-            })
-            .on('changed.jstree', function (e, data) {
-                console.log("changed.jstree: " + data.selected);
-                if(data && data.selected && data.selected.length) {
-                    PLX.MediaManager.Browser.loadFolder(data.node.id);
-                }
-                else {
-                    PLX.MediaManager.Browser.clearGrid();
-                }
-            });
+                .on('ready.jstree', function (e, data) {
+                    resolve({ e: e, data: data });
+                })
+                .on('changed.jstree', function (e, data) {
+                    console.log("changed.jstree: " + data.selected);
+                    if (data && data.selected && data.selected.length) {
+                        PLX.MediaManager.Browser.loadFolder(data.node.id);
+                    }
+                    else {
+                        PLX.MediaManager.Browser.clearGrid();
+                    }
+                });
         });
     }
 
     showUploader() {
         $("#modal").show();
         $("#uploadContainer").show();
-        $("#uploadContainer" ).animate({
+        $("#uploadContainer").animate({
             opacity: 1,
             width: 280,
             height: 150
-          }, 200);
-          setTimeout(() => {
+        }, 200);
+        setTimeout(() => {
             $("#uploader").fadeIn(200);
-          }, 100 )
+        }, 100)
     };
 
     hideUploader() {
@@ -190,10 +195,10 @@ class Browser  {
             opacity: 0,
             width: 0,
             height: 0
-          }, 400, () => {
+        }, 400, () => {
             $("#modal").hide();
             $("#uploadContainer").hide();
-          } );
+        });
     };
 
     showCopyright() {
@@ -211,11 +216,11 @@ class Browser  {
     }
 
     showError(message) {
-        $("#error").text(message);
+        $("#error-message").text(message);
         $("#modal").show();
         $("#error").show();
     }
-    
+
     showLoading() {
         $("#loading").show();
     }
