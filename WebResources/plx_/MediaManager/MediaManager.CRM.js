@@ -3,9 +3,30 @@ PLX.MediaManager = PLX.MediaManager || {};
 
 PLX.MediaManager.CRM = class CRM {
 
+    // this really shouldn't be hardcoded...
+    websiteid = "2AB10DAB-D681-4911-B881-CC99413F07B6";
+    publishedStateId = "ecde1bbf-e1f2-48b5-a7bf-6dd2524a1023";
+    portalUrl = "https://digitalculturenetwork.microsoftcrmportals.com";
+
     xrm;
     constructor(xrm) {
         this.xrm = xrm;
+    }
+
+    async init() {
+        // website info
+        let results = await this.xrm.WebApi.online.retrieveMultipleRecords("adx_website",
+            "?$select=adx_websiteid,adx_partialurl,adx_primarydomainname&$top=1");
+        if (results.entities.length == 0) throw "No website defined."
+        this.websiteid = results.entities[0]["adx_websiteid"];
+        var adx_primarydomainname = results.entities[0]["adx_primarydomainname"];
+        var adx_partialurl = results.entities[0]["adx_partialurl"];
+        this.portalUrl = "https://" + adx_primarydomainname + ((adx_partialurl) ? adx_partialurl : "");
+        // publishing state
+        results = await this.xrm.WebApi.online.retrieveMultipleRecords("adx_publishingstate",
+            "?$select=adx_publishingstateid&$filter=adx_name eq 'Published' and  _adx_websiteid_value eq " + this.websiteid + "&$top=1");
+        if (results.entities.length == 0) throw "No publishing state found."
+        this.publishedStateId = results.entities[0]["adx_publishingstateid"];
     }
 
     getFolders() {
@@ -88,12 +109,13 @@ PLX.MediaManager.CRM = class CRM {
                         type: PLX.MediaManager.CRM.getTypeFromFileName(adx_name)
                     });
                 },
-                function(error) {
+                function (error) {
                     Xrm.Utility.alertDialog(error.message);
                 }
             );
         });
     }
+
 
     static getTypeFromFileName(name) {
         let arrEndings = name.toLowerCase().match(/\.([a-z]+)$/);
@@ -119,12 +141,19 @@ PLX.MediaManager.CRM = class CRM {
     getImageSrc(file) {
         return new Promise((resolve, reject) => {
             let id = file.id.replace("{", "").replace("}", "");
-            this.xrm.WebApi.online.retrieveMultipleRecords("annotation", "?$select=documentbody&$filter=_objectid_value eq " + id).then(
+            let portalUrl = this.portalUrl;
+            //this.xrm.WebApi.online.retrieveMultipleRecords("annotation", "?$select=documentbody&$filter=_objectid_value eq " + id).then(
+            this.xrm.WebApi.online.retrieveMultipleRecords("annotation", "?$select=annotationid&$filter=_objectid_value eq " + id + "&$orderby=createdon desc&$top=1").then(
                 function success(results) {
-                    // todo: multiple attachements?
-                    for (var i = 0; i < results.entities.length; i++) {
-                        var documentbody = results.entities[i]["documentbody"];
-                        resolve("data:" + file.type + ";base64, " + documentbody);
+                    if (results.entities.length > 0) {
+                        var annotationid = results.entities[0]["annotationid"];
+                        if (annotationid) {
+                            resolve(portalUrl + "/_entity/annotation/" + annotationid);
+                        } else {
+                            reject("No Image found.");
+                        }
+                    } else {
+                        reject("No image found.")
                     }
                 },
                 function (error) {
@@ -135,10 +164,7 @@ PLX.MediaManager.CRM = class CRM {
     }
 
     async uploadFile(file, folderId, data) {
-        //data.fileName;
-        //data.title;
-        //data.partialUrl;
-        let webFileId = await this.createWebFile(file.name, data.title, data.partialUrl, folderId);
+        let webFileId = await this.createWebFile(data.fileName, data.title, data.partialUrl, folderId);
         let documentBody = await this.getFileAsBase64(file);
         await this.createNote(webFileId, documentBody, file.name, file.type);
     }
@@ -150,6 +176,8 @@ PLX.MediaManager.CRM = class CRM {
             entity.adx_title = title;
             entity.adx_partialurl = partialUrl;
             entity["adx_parentpageid@odata.bind"] = "/adx_webpages(" + parentId + ")";
+            entity["adx_websiteid@odata.bind"] = "/adx_websites(" + this.websiteid + ")";
+            entity["adx_publishingstateid@odata.bind"] = "/adx_publishingstates(" + this.publishedStateId + ")";
 
             this.xrm.WebApi.online.createRecord("adx_webfile", entity).then(
                 function success(result) {

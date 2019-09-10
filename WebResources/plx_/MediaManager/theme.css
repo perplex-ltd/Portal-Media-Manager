@@ -409,3 +409,6 @@ button:disabled {
     bottom: 0px;
     position: absolute;
 }
+.actionButton {
+    display: none;
+}

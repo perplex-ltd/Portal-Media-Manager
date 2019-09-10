@@ -18,9 +18,27 @@ class Browser {
     async init() {
         try {
             this.showLoading();
+            await this.intf.init();
+            let param = {};
+            try {
+                var p = this.getParameterByName("data");
+                if (p) {
+                    param = JSON.parse(decodeURIComponent(p));
+                }
+            } catch (error) {
+                //ignore...
+            }
+            if (param.mode == "copyUrl") {
+                $("#select").hide();
+                $("#copy").show();
+            } else {
+                $("#select").show();
+                $("#copy").hide();
+            }
             this.clearGrid();
             this.setupUploader();
             $("#select").on("click", this.selectPicture);
+            $("#copy").on("click", this.copyPictureAddress);
             await this.loadTreeview();
             $('#treeview-container').jstree(true).select_node(this.currentFolderId);
         } catch (error) {
@@ -31,7 +49,7 @@ class Browser {
 
     setupUploader() {
         console.log("setup uploader...");
-        let dropArea =  document.getElementById('middle');
+        let dropArea = document.getElementById('middle');
         // prevent default event
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             dropArea.addEventListener(eventName, (e) => {
@@ -64,7 +82,7 @@ class Browser {
     async uploadImage() {
         if (this.imageToUpload) {
             this.showLoading();
-            try{
+            try {
                 await this.intf.uploadFile(this.imageToUpload, this.currentFolderId, {
                     fileName: $("#upFileName").val(),
                     title: $("#upTitle").val(),
@@ -113,12 +131,12 @@ class Browser {
         var title = fileName.replace(/\.[^.]+$/, ""); // remove file ending
         title = title.replace(/([a-z])([A-Z])/g, "$1 $2"); // camelCase => camel Case
         title = title.replace(/\W/g, " "); // replace any special characters with space
-        title = title.replace(/(\b[a-z])/g, (m) => { return m.toUpperCase()}); // capitalise each word
+        title = title.replace(/(\b[a-z])/g, (m) => { return m.toUpperCase() }); // capitalise each word
         return title;
     }
     // Thanks https://www.codexworld.com/how-to/convert-file-size-bytes-kb-mb-gb-javascript/
     sizeToString(bytes, decimalPoint) {
-        if(bytes == 0) return '0 Bytes';
+        if (bytes == 0) return '0 Bytes';
         var k = 1024,
             dm = decimalPoint || 2,
             sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
@@ -132,8 +150,8 @@ class Browser {
         if (noAnimate) {
             $("#uploader").hide();
             $("#uploadContainer")
-                .css("opacity", 0) 
-                .css("width", 0) 
+                .css("opacity", 0)
+                .css("width", 0)
                 .css("height", 0);
             $("#modal").hide();
             $("#uploadContainer").hide();
@@ -166,7 +184,7 @@ class Browser {
     clearDetailsPane() {
         $(".picInfo").val("");
         $("#previewImage").attr("src", "details.png");
-        $("#select").attr("disabled", true);
+        $(".actionButton").attr("disabled", true);
         this.currentImage = null;
 
     }
@@ -191,7 +209,7 @@ class Browser {
             '</div>');
         $("#grid-container").append(card);
         let imgSrc = await this.intf.getImageSrc(file);
-        console.log("url('" + imgSrc + "')");
+        $(card).attr("data-url", imgSrc);
         $(card).children(".content")
             .css("background", "url('" + imgSrc + "')")
             .css("background-size", "cover");
@@ -202,9 +220,8 @@ class Browser {
         $(tile).addClass("selected");
         let bg = $(tile).children(".content").css("background");
         //rgba(0, 0, 0, 0) url("https://digitalculturenetwork.microsoftcrmportals.com/knowledge/test.jpg") repeat scroll 0% 0% / cover padding-box border-box
-        let matches = bg.match(/url\("(.*)"\)/)
-        if (matches.length == 2) {
-            let src = matches[1];
+        let src = $(tile).data("url");
+        if (src) {
             $("#previewImage").attr("src", src);
             let img = document.createElement("img");
             img.src = src;
@@ -218,8 +235,9 @@ class Browser {
         $("#picTitle").val(file.title);
         $("#picType").val(file.title);
         $("#picPartialUrl").val(file.partialUrl);
+        $("#picSrc").val(src);
         this.currentImage = file;
-        $("#select").removeAttr("disabled");
+        $(".actionButton").removeAttr("disabled");
     }
 
     selectPicture(e) {
@@ -230,12 +248,17 @@ class Browser {
         window.close();
     }
 
-    async setupTree(items) {
+    copyPictureAddress(e) {
+        $("#picSrc").select();
+        document.execCommand("copy");
+    }
+
+    setupTree(items) {
         return new Promise((resolve) => {
 
             this.currentFolderId = this.getParameterByName("folder");
             if (!this.currentFolderId) {
-                this.currentFolderId = items.find((value) => { return value.parent == "#";}).id;
+                this.currentFolderId = items.find((value) => { return value.parent == "#"; }).id;
             }
             $('#treeview-container').jstree({
                 'core': {

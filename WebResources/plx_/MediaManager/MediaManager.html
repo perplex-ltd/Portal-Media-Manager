@@ -102,30 +102,35 @@
                 <img id="previewImage" src="details.png" />
                 <label class="labelInput">
                     <span>Name</span>
-                    <input type="text" id="picName" disabled value="" class="picInfo" />
+                    <input type="text" id="picName" readonly value="" class="picInfo" />
                 </label>
                 <label class="labelInput">
                     <span>Title</span>
-                    <input type="text" id="picTitle" disabled value="" class="picInfo" />
+                    <input type="text" id="picTitle" readonly value="" class="picInfo" />
                 </label>
                 <label class="labelInput">
                     <span>Partial Url</span>
-                    <input type="text" id="picPartialUrl" disabled value="" class="picInfo" />
+                    <input type="text" id="picPartialUrl" readonly value="" class="picInfo" />
+                </label>
+                <label class="labelInput">
+                    <span>Url</span>
+                    <input type="text" id="picSrc" readonly value="" class="picInfo" />
                 </label>
                 <label class="labelInput">
                     <span>Type</span>
-                    <input type="text" id="picType" disabled value="" class="picInfo" />
+                    <input type="text" id="picType" readonly value="" class="picInfo" />
                 </label>
                 <label class="labelInput">
                     <span>Width</span>
-                    <input type="text" id="picWidth" disabled value="800px" class="picInfo" />
+                    <input type="text" id="picWidth" readonly value="800px" class="picInfo" />
                 </label>
                 <label class="labelInput">
                     <span>Height</span>
-                    <input type="text" id="picHeight" disabled value="1200px" class="picInfo" />
+                    <input type="text" id="picHeight" readonly value="1200px" class="picInfo" />
                 </label>
                 <div>&nbsp;</div>
-                <button id="select">Select Image</button>
+                <button id="select" class="actionButton">Select Image</button>
+                <button id="copy" class="actionButton">Copy Image Address</button>
             </div>
         </div>
     </div>
