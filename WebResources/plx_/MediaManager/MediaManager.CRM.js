@@ -164,17 +164,18 @@ PLX.MediaManager.CRM = class CRM {
     }
 
     async uploadFile(file, folderId, data) {
-        let webFileId = await this.createWebFile(data.fileName, data.title, data.partialUrl, folderId);
+        let webFileId = await this.createWebFile(data.fileName, data.title, data.partialUrl, folderId, data.summary);
         let documentBody = await this.getFileAsBase64(file);
         await this.createNote(webFileId, documentBody, file.name, file.type);
     }
 
-    createWebFile(fileName, title, partialUrl, parentId) {
+    createWebFile(fileName, title, partialUrl, parentId, summary) {
         return new Promise((resolve, reject) => {
             var entity = {};
             entity.adx_name = fileName;
             entity.adx_title = title;
             entity.adx_partialurl = partialUrl;
+            entity.adx_summary = summary;
             entity["adx_parentpageid@odata.bind"] = "/adx_webpages(" + parentId + ")";
             entity["adx_websiteid@odata.bind"] = "/adx_websites(" + this.websiteid + ")";
             entity["adx_publishingstateid@odata.bind"] = "/adx_publishingstates(" + this.publishedStateId + ")";

@@ -86,7 +86,8 @@ class Browser {
                 await this.intf.uploadFile(this.imageToUpload, this.currentFolderId, {
                     fileName: $("#upFileName").val(),
                     title: $("#upTitle").val(),
-                    partialUrl: $("#upPartialUrl").val()
+                    partialUrl: $("#upPartialUrl").val(),
+                    summary: $("#upSummary").val()
                 });
                 await this.loadFolder(this.currentFolderId);
                 this.closeUploader();
@@ -111,13 +112,14 @@ class Browser {
         $("#upPartialUrl").val(this.convertToUrl(file.name));
         $("#upTitle").val(this.convertToTitle(file.name));
         $("#upSize").val(this.sizeToString(file.size));
+        $("#upSummary").val("");
         $("#upType").val(file.type);
         $("#modal").show();
         $("#uploadContainer").show();
         $("#uploadContainer").animate({
             opacity: 1,
             width: 400,
-            height: 250
+            height: 275
         }, 200);
         setTimeout(() => {
             $("#uploader").fadeIn(200);
