@@ -265,7 +265,8 @@ class Browser {
             $('#treeview-container').jstree({
                 'core': {
                     'data': items
-                }
+                },
+                "plugins": [ "sort" ]
             })
                 .on('ready.jstree', function (e, data) {
                     resolve({ e: e, data: data });

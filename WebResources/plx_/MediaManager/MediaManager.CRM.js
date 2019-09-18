@@ -45,7 +45,10 @@ PLX.MediaManager.CRM = class CRM {
                             text: adx_name,
                             parent: _adx_parentpageid_value
                         };
-                        if (page.parent == null) page.parent = "#";
+                        if (page.parent == null) {
+                            page.parent = "#";
+                            page.state = { opened: true }
+                        }
                         pages.push(page);
                     }
                     resolve(pages);
